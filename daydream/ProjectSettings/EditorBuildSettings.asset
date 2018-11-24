@@ -6,9 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/Scenes/GlobalScene.unity
+    guid: 66811362f1d2949ffb03775f58fa9e4a
   - enabled: 1
     path: Assets/Scenes/BallFear.unity
     guid: 24c993f50402042559e078c169051514
+  - enabled: 1
+    path: Assets/Scenes/RoomFear.unity
+    guid: d430f0326e76f467faaec922346f167e
   m_configObjects: {}

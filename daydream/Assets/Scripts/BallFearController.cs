@@ -6,49 +6,57 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
+
+
+public class GameState
+{
+    public string command;
+    public string animal;
+    public int exposure;
+}
+
 
 public class BallFearController : MonoBehaviour {
 
     private Renderer _renderer;
-    private string ball_state = "still";
-    // private string _url = "http://127.0.0.1:5000/ball_fear";
-    private string _url = "http://18.203.88.206/ball_fear";
+    private GameState state_map;
 
+    private string ball_state = "still";
+    private string _url = "http://18.203.88.206/exchange_data";
+
+    private float MIN_Z_DISTANCE = -4.0f;
+    private float MAX_Z_DISTANCE = 20.0f;
 
     void Start () {
         _renderer = gameObject.GetComponent<Renderer>();
-        InvokeRepeating("UpdateBallState", 1.0f, 1.0f);
-        // Input.compass.enabled = true;
+        InvokeRepeating("UpdateBallState", 0.6f, 0.6f);
     }
 
-
-    void UpdateBallState(){
-        using (WWW www = new WWW(_url))
+    IEnumerator UpdateBallState(){
+        Vector3 c = Camera.current.transform.position;
+        string param = "?x="+ c.x + "&y=" + c.y + "&z=" + c.z;
+        string q = _url + param;
+        using (WWW www = new WWW(q))
         {
-            while (!www.isDone)
-            {
-                // Wait response
-                continue;
-            }
+            yield return www;
             if (string.IsNullOrEmpty(www.error)){
-                // Here, no error
                 ball_state = www.text;
-            }else{
-                // Something whent wront ...
-                ball_state = "still";
-                Debug.LogError(www.error);
+                Debug.Log(">>>> DATA: " + ball_state);
+                state_map = JsonUtility.FromJson<GameState>(ball_state);
             }
         }
-        Debug.Log("... Updating ball state ... "+ball_state);
     }
 
-	void Update () {
+    void Update () {
 
         // Called when update frames
         Vector3 spherePosition = _renderer.transform.position;
+        Debug.Log(">>> Exposure: " + state_map.exposure);
 
         // Change position
+        /**
         switch (ball_state)
         {
             case "closer":
@@ -62,18 +70,17 @@ public class BallFearController : MonoBehaviour {
             default:
                 break;
         }
+        **/
 
         // Limit max distance
-        if (spherePosition.z > 20.0)
-            spherePosition.z = 20.0f;
+        if (spherePosition.z > MAX_Z_DISTANCE)
+            spherePosition.z = MAX_Z_DISTANCE;
 
         // Limit min distance
-        if (spherePosition.z < 1.0)
-            spherePosition.z = 1.0f;
+        if (spherePosition.z < MIN_Z_DISTANCE)
+            spherePosition.z = MIN_Z_DISTANCE;
 
+        // Transform position 
         _renderer.transform.position = spherePosition;
-        // Debug.Log(">>> " + spherePosition);
-        // Debug.Log("Orientation " + Input.compass.trueHeading);
-
 	}
 }
