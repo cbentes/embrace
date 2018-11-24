@@ -4,9 +4,18 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 
 
+public class GameState
+{
+    public string command;
+    public string animal;
+    public int exposure;
+}
+
+
 public class ChangeScene : MonoBehaviour {
 
-    private string _url = "http://18.203.88.206/get_environment";
+    // private string _url = "http://18.203.88.206/get_environment";
+    private string _url = "http://127.0.0.1:5000/get_environment";
 
     // Use this for initialization
     void Start () {

@@ -10,34 +10,38 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 
 
-public class BallFearController : MonoBehaviour {
+public class RoomFearController : MonoBehaviour {
 
     private Renderer _renderer;
     private GameState state_map;
 
     // private string _url = "http://18.203.88.206/exchange_data";
     private string _url = "http://127.0.0.1:5000/exchange_data";
-    private float MIN_Z_DISTANCE = -4.0f;
+    private float MIN_Z_DISTANCE = 0.0f;
     private float MAX_Z_DISTANCE = 20.0f;
 
     void Start () {
         _renderer = gameObject.GetComponent<Renderer>();
-        InvokeRepeating("UpdateBallState", 0.6f, 0.6f);
+        InvokeRepeating("UpdateRoomState", 0.6f, 0.6f);
     }
 
-    IEnumerator UpdateBallState(){
+    IEnumerator UpdateRoomState()
+    {
         Vector3 c = Camera.current.transform.position;
-        string param = "?x="+ c.x + "&y=" + c.y + "&z=" + c.z;
+        string param = "?x=" + c.x + "&y=" + c.y + "&z=" + c.z;
         string q = _url + param;
         using (WWW www = new WWW(q))
         {
             yield return www;
-            if (string.IsNullOrEmpty(www.error)){
+            if (string.IsNullOrEmpty(www.error))
+            {
+                // Debug.Log(">>>> DATA: " + ball_state);
                 state_map = JsonUtility.FromJson<GameState>(www.text);
             }
         }
     }
 
+    // Update is called once per frame
     void Update () {
         // Called when update frames
         Vector3 spherePosition = _renderer.transform.position;
@@ -56,5 +60,5 @@ public class BallFearController : MonoBehaviour {
 
         // Transform position 
         _renderer.transform.position = spherePosition;
-	}
+    }
 }
