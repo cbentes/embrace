@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import axios from 'axios'
+import { API } from './constants';
 
 import Scene from './Scene';
 
@@ -15,6 +17,8 @@ const styles = theme => ({
   }
 });
 
+const environmentNames = ['dog', 'spider', 'rat', 'room'];
+
 class Scenes extends Component {
     constructor(props) {
         super(props);
@@ -25,6 +29,13 @@ class Scenes extends Component {
 
     handleSelectScene = (index) => {
         this.setState({selectedImage: index})
+        axios.post(`${API}/set_environment`, {environment: environmentNames[index]}, {withCredentials: true})
+    }
+
+    componentDidMount() {
+        axios.get(`${API}/get_environment_ui`, {withCredentials: true}).then(({data: environment}) => this.setState({
+            selectedImage: environmentNames.indexOf(environment)
+        }))
     }
 
     render() {
@@ -33,25 +44,32 @@ class Scenes extends Component {
         return (
             <div className={classes.container}>
                 <Scene
-                    image="http://18.203.88.206/static/images/dog.jpg"
+                    image={`${API}/static/images/dog.jpg`}
                     isSelected={selectedImage == 0}
                     name="Dog"
                     description={lorem}
                     onSelectScene={() => this.handleSelectScene(0)}/>
 
                 <Scene
-                    image="http://18.203.88.206/static/images/spider.jpg"
+                    image={`${API}/static/images/spider.jpg`}
                     isSelected={selectedImage == 1}
                     name="Spider"
                     description={lorem}
                     onSelectScene={() => this.handleSelectScene(1)}
                 />
                 <Scene
-                    image="http://18.203.88.206/static/images/room.jpg"
+                    image={`${API}/static/images/rat.jpg`}
                     isSelected={selectedImage == 2}
-                    name="Room"
+                    name="Rat"
                     description={lorem}
                     onSelectScene={() => this.handleSelectScene(2)}
+                />
+                <Scene
+                    image={`${API}/static/images/room.jpg`}
+                    isSelected={selectedImage == 3}
+                    name="Room"
+                    description={lorem}
+                    onSelectScene={() => this.handleSelectScene(3)}
                 />
             </div>
         )

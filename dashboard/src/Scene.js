@@ -13,20 +13,39 @@ const styles = theme => ({
   card: {
     maxWidth: 345,
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    transition: 'background-color 0.2s',
+    position: 'relative',
+  },
+  actionAreaContainer: {
+    display: 'flex',
+  },
+  actionArea: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    paddingBottom: 50,
+  },
+  cardContent: {
+    flex: 1,
   },
   selected: {
     background: theme.palette.primary.light,
     color: 'white',
+    transition: 'color 0.2s'
   },
-  selectedBadge: {
+  badge: {
+    transition: 'bottom 0.2s',
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: -50,
     boxSizing: 'border-box',
     textTransform: 'uppercase',
+    letterSpacing: 0.2,
     textAlign: 'center',
     width: '100%',
     background: '#4CAF50',
     color: 'white',
-    flex: 1,
     display: 'flex',
     padding: '14px 10px',
 
@@ -34,6 +53,9 @@ const styles = theme => ({
         flex: 1,
         margin: 'auto',
     }
+  },
+  selectedBadge: {
+    bottom: 0,
   },
   selectedText: {
     color: 'white',
@@ -46,8 +68,8 @@ const styles = theme => ({
 function Scene(props) {
   const { classes, image, isSelected, name, description, onSelectScene } = props;
   return (
-    <Card className={isSelected ? classes.card + ' ' + classes.selected : classes.card}>
-      <CardActionArea>
+    <Card className={isSelected ? classes.card + ' ' + classes.selected : classes.card} onClick={onSelectScene}>
+      <CardActionArea className={classes.actionArea}>
         <CardMedia
           component="img"
           alt="Contemplative Reptile"
@@ -56,7 +78,7 @@ function Scene(props) {
           image={image}
           title="Contemplative Reptile"
         />
-        <CardContent className={isSelected ? classes.selectedText : null}>
+        <CardContent className={classes.cardContent + ' ' + (isSelected ? classes.selectedText : '')}>
           <Typography gutterBottom variant="h5" component="h2" color='inherit'>
             {name}
           </Typography>
@@ -65,13 +87,9 @@ function Scene(props) {
           </Typography>
         </CardContent>
       </CardActionArea>
-        {isSelected ?
-            <div className={classes.selectedBadge}><span>Selected</span></div> :
-            <CardActions>
-                <Button size="small" color="primary" onClick={onSelectScene}>
-                    Select
-                </Button>}
-            </CardActions>}
+      <div className={classes.badge + ' ' + (isSelected ? classes.selectedBadge : '')}>
+        <span>Selected</span>
+      </div>
     </Card>
   );
 }

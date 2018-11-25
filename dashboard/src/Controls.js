@@ -9,6 +9,9 @@ import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import Slider from '@material-ui/lab/Slider';
 import Typography from '@material-ui/core/Typography';
+import { API } from './constants';
+import axios from 'axios';
+import _ from 'lodash';
 
 const styles = theme => ({
     container: {
@@ -23,7 +26,7 @@ const styles = theme => ({
         display: 'flex',
 
         '&:last-child': {
-            flex: 2
+            flex: 3
         }
     },
     formControl: {
@@ -61,6 +64,15 @@ class Controls extends Component {
 
     handleExposureChange = (event, value) => {
         this.setState({ exposure: value })
+        this.postExposure(value);
+    }
+
+    postExposure = _.debounce((value) => {
+        axios.post(`${API}/set_exposure`, {exposure: value}, {withCredentials: true})
+    }, 500)
+
+    componentDidMount() {
+        axios.get(`${API}/get_exposure`, {withCredentials: true}).then(({data: exposure}) => this.setState({ exposure: Number(exposure) }))
     }
 
     render() {
