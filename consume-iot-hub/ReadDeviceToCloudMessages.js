@@ -21,6 +21,7 @@ var connectionString = 'HostName=junction.azure-devices.net;SharedAccessKeyName=
 // The sample connects to an IoT hub's Event Hubs-compatible endpoint
 // to read messages sent from a device.
 var { EventHubClient, EventPosition } = require('@azure/event-hubs');
+var request = require('request');
 
 var printError = function (err) {
   console.log(err.message);
@@ -30,14 +31,15 @@ var printError = function (err) {
 // - Telemetry is sent in the message body
 // - The device can add arbitrary application properties to the message
 // - IoT Hub adds system properties, such as Device Id, to the message.
-var printMessage = function (message) {
-  console.log('Telemetry received: ');
-  console.log(JSON.stringify(message.body));
-  console.log('Application properties (set by device): ')
-  console.log(JSON.stringify(message.applicationProperties));
-  console.log('System properties (set by IoT Hub): ')
-  console.log(JSON.stringify(message.annotations));
-  console.log('');
+var processMessage = function (message) {
+  console.log('Message received')
+  request.post({
+    headers: { 'content-type': 'application/json' },
+    url: 'http://18.203.88.206/push_data',
+    body: JSON.stringify(message.body)
+  }, function (error, response, body) {
+    console.log(body);
+  });
 };
 
 // Connect to the partitions on the IoT Hub's Event Hubs-compatible endpoint.
@@ -50,6 +52,6 @@ EventHubClient.createFromIotHubConnectionString(connectionString).then(function 
 }).then(function (ids) {
   console.log("The partition ids are: ", ids);
   return ids.map(function (id) {
-    return ehClient.receive(id, printMessage, printError, { eventPosition: EventPosition.fromEnqueuedTime(Date.now()) });
+    return ehClient.receive(id, processMessage, printError, { eventPosition: EventPosition.fromEnqueuedTime(Date.now()) });
   });
 }).catch(printError);
