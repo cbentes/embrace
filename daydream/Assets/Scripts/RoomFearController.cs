@@ -19,6 +19,8 @@ public class RoomFearController : MonoBehaviour {
 
     private float MIN_DELTA = 0.0f;
     private float MAX_DELTA = 3.0f;
+    private string DEVICE = "D000001";
+
     private float initial_z;
 
     void Start () {
@@ -41,7 +43,7 @@ public class RoomFearController : MonoBehaviour {
         Camera cam = Camera.current;
         if(cam){
             Vector3 c = cam.transform.position;
-            string param = "?x=" + c.x + "&y=" + c.y + "&z=" + c.z;
+            string param = "?x=" + c.x + "&y=" + c.y + "&z=" + c.z + "&dev=" + DEVICE;
             string q = _url + param;
             using (WWW www = new WWW(q))
             {
