@@ -1,27 +1,17 @@
 package com.movesense.samples.dataloggersample;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodSession;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.MessageCallback;
-import com.movesense.mds.Mds;
 import com.movesense.mds.MdsException;
 import com.movesense.mds.MdsNotificationListener;
 import com.movesense.mds.MdsSubscription;
@@ -29,8 +19,6 @@ import com.movesense.mds.MdsSubscription;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.movesense.mds.Mds.URI_EVENTLISTENER;
 import static com.movesense.samples.dataloggersample.MainActivity.mMds;
@@ -64,7 +52,9 @@ public class DataLoggerActivity extends AppCompatActivity {
 
     // Sensor subscription
     static private String URI_MEAS_HR = "/Meas/HR";
-    private MdsSubscription mdsSubscription;
+    static private String URI_MEAS_TEMP = "/Meas/Temp";
+    private MdsSubscription heartRateSubscription;
+    private MdsSubscription tempSubscription;
     private String subscribedDeviceSerial;
 
     @Override
@@ -82,12 +72,47 @@ public class DataLoggerActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error initializing client", e);
         }
-        subscribeToSensor();
+        subscribeToHeartRateSensor();
+        subscribeToTemperatureSensor();
     }
 
-    private void subscribeToSensor() {
+    private void subscribeToTemperatureSensor() {
         // Clean up existing subscription (if there is one)
-        if (mdsSubscription != null) {
+        if (tempSubscription != null) {
+            unsubscribe();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        String strContract = sb.append("{\"Uri\": \"").append(connectedSerial).append(URI_MEAS_TEMP).append("\"}").toString();
+        Log.d(LOG_TAG, strContract);
+
+        subscribedDeviceSerial = connectedSerial;
+
+        tempSubscription = mMds.builder().build(this).subscribe(URI_EVENTLISTENER,
+                strContract, new MdsNotificationListener() {
+                    @Override
+                    public void onNotification(String data) {
+                        Log.d(LOG_TAG, "onNotification(): " + data);
+                        ((TextView) findViewById(R.id.temp_data)).setText(data);
+                        try {
+                            sendData(data);
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error sending the msg", e);
+                        }
+                    }
+
+                    @Override
+                    public void onError(MdsException error) {
+                        Log.e(LOG_TAG, "subscription onError(): ", error);
+                        unsubscribe();
+                    }
+                });
+
+    }
+
+    private void subscribeToHeartRateSensor() {
+        // Clean up existing subscription (if there is one)
+        if (heartRateSubscription != null) {
             unsubscribe();
         }
 
@@ -97,7 +122,7 @@ public class DataLoggerActivity extends AppCompatActivity {
 
         subscribedDeviceSerial = connectedSerial;
 
-        mdsSubscription = mMds.builder().build(this).subscribe(URI_EVENTLISTENER,
+        heartRateSubscription = mMds.builder().build(this).subscribe(URI_EVENTLISTENER,
                 strContract, new MdsNotificationListener() {
                     @Override
                     public void onNotification(String data) {
@@ -120,9 +145,14 @@ public class DataLoggerActivity extends AppCompatActivity {
     }
 
     private void unsubscribe() {
-        if (mdsSubscription != null) {
-            mdsSubscription.unsubscribe();
-            mdsSubscription = null;
+        if (heartRateSubscription != null) {
+            heartRateSubscription.unsubscribe();
+            heartRateSubscription = null;
+        }
+
+        if (tempSubscription != null) {
+            tempSubscription.unsubscribe();
+            tempSubscription = null;
         }
 
         subscribedDeviceSerial = null;
@@ -133,6 +163,7 @@ public class DataLoggerActivity extends AppCompatActivity {
         unsubscribe();
         try {
             client.closeNow();
+            Log.i(LOG_TAG, "Closed IOT Hub client");
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error closing client", e);
         }
@@ -146,9 +177,11 @@ public class DataLoggerActivity extends AppCompatActivity {
         try
         {
             client.open();
+            Log.i(LOG_TAG, "Opened IOT Hub client");
         }
         catch (Exception e2)
         {
+            e2.printStackTrace();
             Log.e(LOG_TAG, "Exception while opening IoTHub connection", e2);
             client.closeNow();
         }

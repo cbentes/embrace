@@ -15,5 +15,12 @@
         android:layout_marginEnd="11dp"
         android:layout_marginRight="11dp" />
 
+    <TextView
+        android:id="@+id/temp_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="11dp"
+        android:layout_marginRight="11dp" />
+
 
 </LinearLayout>
