@@ -59,7 +59,38 @@ class Controls extends Component {
     }
 
     handleAiControlChange = (event) => {
-        this.setState({ control: event.target.value })
+        const control = event.target.value
+        this.setState({ control: control })
+        if (control == 'ai') {
+            this.startAutoControl()
+        } else if (this.interval) {
+            this.stopAutoControl()
+        }
+    }
+
+    getExposure() {
+        var random_coef = 10 * Math.random();
+        var exposition = this.exposure;
+        var heart_coef = this.props.heartRate[this.props.heartRate.length - 1] || 50
+
+        if(heart_coef >= 100){
+            exposition = 0;
+        }else if(heart_coef >= 90){
+            exposition = 40;
+        }else{
+            exposition = 60;
+        }
+        return Math.round(exposition + random_coef);
+    }
+
+    startAutoControl() {
+        this.interval = setInterval(() => {
+            this.handleExposureChange(null, this.getExposure())
+        }, 5000)
+    }
+
+    stopAutoControl() {
+        clearInterval(this.interval)
     }
 
     handleExposureChange = (event, value) => {
