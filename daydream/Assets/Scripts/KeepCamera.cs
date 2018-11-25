@@ -4,13 +4,10 @@ using UnityEngine;
 
 public class KeepCamera : MonoBehaviour {
 
-	// Use this for initialization
 	void Start () {
+        // Keep Player object (and its camera) when scene changes
+        // New scenes do not have actor, and flow never goes back to main 
+        // scene that chreated the camera (to not create it again)
         DontDestroyOnLoad(this.gameObject);
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }
