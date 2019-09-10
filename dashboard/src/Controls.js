@@ -86,7 +86,7 @@ class Controls extends Component {
     startAutoControl() {
         this.interval = setInterval(() => {
             this.handleExposureChange(null, this.getExposure())
-        }, 5000)
+        }, 2000)
     }
 
     stopAutoControl() {

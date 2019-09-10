@@ -69,12 +69,12 @@ class App extends Component {
       <div className="App">
         <AppBar />
         <main className={classes.container}>
+          <Header>Controls</Header>
+          <Controls heartRate={heartRate} />
           <Header>Sensors</Header>
           <Sensors heartRate={heartRate} direction={direction} temperature={temperature} />
           <Header>Scene</Header>
           <Scenes />
-          <Header>Controls</Header>
-          <Controls heartRate={heartRate} />
         </main>
       </div>
     );
